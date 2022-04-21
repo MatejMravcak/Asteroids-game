@@ -150,8 +150,7 @@ def redrawGameWindow():
 
     for x in Shots:
         x.draw(win)
-        if x.checkOffScreen():
-            Shots.pop(Shots.index(x))
+        
 gameover = False
 
 
@@ -172,7 +171,8 @@ while run:
         player.updateLocation()
         for x in Shots:
             x.move()
-            
+            if x.checkOffScreen():
+                Shots.pop(Shots.index(x))
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
