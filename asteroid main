@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 
 pygame.init()
 screen_w = 1000
@@ -7,7 +8,9 @@ screen_h = 1000
 
 bg = pygame.image.load('space_bg.png')
 playerShip = pygame.image.load('spaceship.png')
-
+asteroid50 = pygame.image.load('asteroid1.jpg')
+asteroid100 = pygame.image.load('asteroid2.jpg')
+asteroid150 = pygame.image.load('asteroid3.jpg')
 pygame.display.set_caption('Asteroids')
 
 win = pygame.display.set_mode((screen_w, screen_h))
@@ -76,12 +79,22 @@ class Player(object):
         self.sine = math.sin(math.radians(self.angle + 90))
         self.head = (self.x + self.cosine * self.w // 2, self.y - self.sine * self.h // 2)
 
+    def updateLocation(self):
+        if self.x > screen_w + 50:
+            self.x = 0
+        elif self.x < 0 - self.w:
+            self.x = screen_w
+        elif self.y < -50:
+            self.y = screen_h
+        elif self.y > screen_h + 50:
+            self.y = 0
+
 class strela(object):
     def __init__(self):
         self.point = player.head
         self.x, self.y = self.point
-        self.w = 4
-        self.h = 4
+        self.w = 10
+        self.h = 10
         self.c = player.cosine
         self.s = player.sine
         self.xv = self.c * 10
@@ -94,28 +107,73 @@ class strela(object):
     def draw(self, win):
         pygame.draw.rect(win, (255, 255, 255), [self.x, self.y, self.w, self.h])
 
+    def checkOffScreen(self):
+        if self.x < -50 or self.x > screen_w or self.y > screen_h or self.y < -50:
+            return True
 
+class Asteroid(object):
+    def __init__(self, rank):
+        self.rank = rank
+        if self.rank == 1:
+            self.image = asteroid50
+        elif self.rank == 2:
+            self.image = asteroid100
+        else:
+            self.image = asteroid150
+        self.w = 50 * rank
+        self.h = 50 * rank
+        self.ranPoint = random.choice(
+            [(random.randrange(0, screen_w - self.w), random.choice([-1 * self.h - 5, screen_h + 5])),
+             (random.choice([-1 * self.w - 5, screen_w + 5]), random.randrange(0, screen_h - self.h))])
+        self.x, self.y = self.ranPoint
+        if self.x < screen_w // 2:
+            self.xdir = 1
+        else:
+            self.xdir = -1
+        if self.y < screen_h // 2:
+            self.ydir = 1
+        else:
+            self.ydir = -1
+        self.xvel = self.xdir * random.randrange(1, 3)
+        self.yvel = self.ydir * random.randrange(1, 3)
+
+    def draw(self, win):
+        win.blit(self.image, (self.x, self.y))
 
 def redrawGameWindow():
     #nastavanie backgroundu
     #blit = copy objects from one surface to another
     win.blit(bg, (0,0))
     player.draw(win)
+    for z in asteroids:
+        z.draw(win)
+
     for x in Shots:
         x.draw(win)
-    pygame.display.update()
+        if x.checkOffScreen():
+            Shots.pop(Shots.index(x))
 gameover = False
 
 
 Shots = []
 player = Player()
+asteroids = []
+count = 0
 run = True
 while run:
     #nastavujeme FPS na 60
     clock.tick(60)
+    count =+ 1
     if not gameover:
+        if not gameover:
+            if count % 50 == 0:
+                ran = random.choice([1, 1, 1, 2, 2, 3])
+                asteroids.append(Asteroid(ran))
+        player.updateLocation()
         for x in Shots:
             x.move()
+            
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             player.turnLeft()
@@ -133,6 +191,9 @@ while run:
                 if not gameover:
                     Shots.append(strela())
 
+    for z in asteroids:
+        z.x += z.xv
+        z.y += z.yv
     redrawGameWindow()
 
 pygame.quit()
