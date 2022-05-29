@@ -17,7 +17,7 @@ win = pygame.display.set_mode((screen_w, screen_h))
 
 clock = pygame.time.Clock()
 
-
+gameover = False
 
 
 class Player(object):
@@ -122,10 +122,13 @@ class Asteroid(object):
             self.image = asteroid150
         self.w = 50 * rank
         self.h = 50 * rank
-        self.ranPoint = random.choice(
-            [(random.randrange(0, screen_w - self.w), random.choice([-1 * self.h - 5, screen_h + 5])),
-             (random.choice([-1 * self.w - 5, screen_w + 5]), random.randrange(0, screen_h - self.h))])
+        self.ranPoint = random.choice([(random.randrange(0, screen_w - self.w), random.choice([-1 * self.h - 5, screen_h + 5])),(random.choice([-1 * self.w - 5, screen_w + 5]), random.randrange(0, screen_h - self.h))])
         self.x, self.y = self.ranPoint
+
+
+        self.x, self.y = self.ranPoint
+
+
         if self.x < screen_w // 2:
             self.xdir = 1
         else:
@@ -144,14 +147,17 @@ def redrawGameWindow():
     #nastavanie backgroundu
     #blit = copy objects from one surface to another
     win.blit(bg, (0,0))
+
+
     player.draw(win)
     for z in asteroids:
         z.draw(win)
 
     for x in Shots:
         x.draw(win)
-        
-gameover = False
+
+    pygame.display.update()
+
 
 
 Shots = []
@@ -164,8 +170,8 @@ while run:
     clock.tick(60)
     count =+ 1
     if not gameover:
-        if not gameover:
-            if count % 50 == 0:
+
+        if count % 50 == 0:
                 ran = random.choice([1, 1, 1, 2, 2, 3])
                 asteroids.append(Asteroid(ran))
         player.updateLocation()
@@ -174,6 +180,10 @@ while run:
             if x.checkOffScreen():
                 Shots.pop(Shots.index(x))
 
+        for z in asteroids:
+            z.x += z.xvel
+            z.y += z.yvel
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             player.turnLeft()
@@ -181,7 +191,7 @@ while run:
             player.turnRight()
         if keys[pygame.K_UP]:
             player.moveForward()
-        pass
+
     #ukoncenie hry
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -191,9 +201,7 @@ while run:
                 if not gameover:
                     Shots.append(strela())
 
-    for z in asteroids:
-        z.x += z.xv
-        z.y += z.yv
+
     redrawGameWindow()
 
 pygame.quit()
