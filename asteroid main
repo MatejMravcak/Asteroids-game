@@ -168,7 +168,7 @@ run = True
 while run:
     #nastavujeme FPS na 60
     clock.tick(60)
-    count =+ 1
+    count += 1
     if not gameover:
 
         if count % 50 == 0:
@@ -183,6 +183,13 @@ while run:
         for z in asteroids:
             z.x += z.xvel
             z.y += z.yvel
+
+            for x in Shots:
+                if (x.x >= z.x and x.x <= z.x + z.w) or x.x + x.w >= z.x and x.x + x.w <= z.x + z.w:
+                    if (x.y >= z.y and x.y <= z.y + z.h) or x.y + x.h >= z.y and x.y + x.h <= z.y + z.h:
+
+                        asteroids.pop(asteroids.index(z))
+                        Shots.pop(Shots.index(x))
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
