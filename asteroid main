@@ -18,7 +18,7 @@ win = pygame.display.set_mode((screen_w, screen_h))
 clock = pygame.time.Clock()
 
 gameover = False
-
+lives = 3
 
 class Player(object):
     def __init__(self):
@@ -148,6 +148,8 @@ def redrawGameWindow():
     #blit = copy objects from one surface to another
     win.blit(bg, (0,0))
 
+    font = pygame.font.SysFont('arial', 30)
+    livesText = font.render('Lives: ' + str(lives), 1, (255, 255, 255))
 
     player.draw(win)
     for z in asteroids:
@@ -156,6 +158,7 @@ def redrawGameWindow():
     for x in Shots:
         x.draw(win)
 
+    win.blit(livesText, (25, 25))
     pygame.display.update()
 
 
@@ -184,6 +187,12 @@ while run:
             z.x += z.xvel
             z.y += z.yvel
 
+            if (player.x >= z.x and player.x <= z.x + z.w) or player.x + player.w >= z.x and player.x + player.w <= z.x + z.w:
+                if (player.y >= z.y and player.y <= z.y + z.h) or player.y + player.h >= z.y and player.y + player.h <= z.y + z.h:
+                    asteroids.pop(asteroids.index(z))
+                    lives -= 1
+                    break
+
             for x in Shots:
                 if (x.x >= z.x and x.x <= z.x + z.w) or x.x + x.w >= z.x and x.x + x.w <= z.x + z.w:
                     if (x.y >= z.y and x.y <= z.y + z.h) or x.y + x.h >= z.y and x.y + x.h <= z.y + z.h:
@@ -191,6 +200,8 @@ while run:
                         asteroids.pop(asteroids.index(z))
                         Shots.pop(Shots.index(x))
 
+        if lives <= 0:
+            gameover = True
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             player.turnLeft()
@@ -207,6 +218,10 @@ while run:
             if event.key == pygame.K_SPACE:
                 if not gameover:
                     Shots.append(strela())
+                else:
+                    gameover = False
+                    lives = 3
+                    asteroids.clear()
 
 
     redrawGameWindow()
